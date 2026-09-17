@@ -216,3 +216,21 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------- reflex-react-joyride
+# Compiled frontend and Reflex state, in the demo app and anywhere a component
+# is rendered from the repo root.
+.web/
+.states/
+reflex.lock
+assets/external/
+/assets/
+
+# Local tooling: the venv, uv/bun/npm caches and the interpreters used to run
+# the demo from this checkout.
+.devtools/
+.ruff_cache/
+
+# IDE settings and local agent output.
+.idea/
+Claude outputs/

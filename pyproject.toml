@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reflex-react-joyride"
+version = "0.1.0"
+description = "Reflex custom component for react-joyride: guided product tours and onboarding walkthroughs, with controlled mode, theming, custom tooltips and Python-driven controls"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Ernesto Crespo", email = "ecrespo@gmail.com" }]
+keywords = [
+    "reflex",
+    "reflex-custom-components",
+    "react-joyride",
+    "joyride",
+    "tour",
+    "onboarding",
+    "walkthrough",
+    "product-tour",
+]
+dependencies = ["reflex>=0.9.11"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: User Interfaces",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/ecrespo/reflex-react-joyride"
+Source = "https://github.com/ecrespo/reflex-react-joyride"
+Issues = "https://github.com/ecrespo/reflex-react-joyride/issues"
+
+[tool.setuptools.packages.find]
+where = ["custom_components"]
+
+[tool.setuptools.package-data]
+reflex_react_joyride = ["*.jsx", "py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+extend-exclude = [".web", ".venv", ".devtools", "reflex.lock"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "W",    # pycodestyle warnings
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "SIM",  # flake8-simplify
+    "BLE",  # flake8-blind-except
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "E501",    # line length is handled by the formatter
+    "RUF012",  # Reflex State class attrs are intentionally mutable defaults
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[dependency-groups]
+dev = [
+    "build>=1.2",
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
