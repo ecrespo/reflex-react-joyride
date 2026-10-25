@@ -101,7 +101,7 @@ class Joyride(NoSSRComponent):
             floating_options: Positioning options forwarded to floating-ui (a FloatingOptions or a dict).
             portal_element: Render the tour inside this element instead of the document body.
             nonce: A nonce for the inline styles, for pages with a strict CSP.
-            tooltip: ------------------------------------------------------------- render props ``lambda props: rx.card(...)`` replacing the built-in tooltip. ``props`` exposes content, title, index, size, current, total, progress, is_last_step, step_id and step_data.
+            tooltip: ------------------------------------------------------------- render props ``lambda props: rx.card(...)`` replacing the built-in tooltip. ``props`` exposes react-joyride's own tooltip props (``index``, ``size``, ``step``, ``isLastStep``, ...) plus ``content``, ``title``, ``current``, ``total``, ``progress``, ``stepId``, ``stepData`` and ``isFirstStep``.
             beacon: ``lambda props: rx.box(...)`` replacing the built-in beacon.
             style: The style of the component.
             key: A unique key for the component.
