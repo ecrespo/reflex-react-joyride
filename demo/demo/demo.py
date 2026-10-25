@@ -3,7 +3,7 @@
 Four pages, each one a tour: the basics, controlled mode, theming with a custom
 tooltip, and the awkward cases (missing targets, scrolling, modal steps).
 
-    cd react_joyride_demo && uv run reflex run
+    cd demo && uv run reflex run
 """
 
 from __future__ import annotations

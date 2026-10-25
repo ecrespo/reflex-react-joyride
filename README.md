@@ -28,13 +28,13 @@ The four pages of the demo app, in order:
 
 | | Version |
 | --- | --- |
-| Python | 3.11, 3.12 or 3.13 |
+| Python | 3.11 to 3.14 |
 | Reflex | **0.10.0** or newer |
 | react-joyride | 3.2.0 (bundled, installed by Reflex on first compile) |
 | Node.js (development and CI only) | 24 LTS, pinned in `.nvmrc` |
 
-> **Upgrading from 0.1.x:** 0.2.0 requires Reflex 0.10 and drops Python 3.10,
-> following Reflex itself. The Python API is unchanged. See the
+> **Upgrading from 0.1.x:** 0.2.0 and later require Reflex 0.10 and drop
+> Python 3.10, following Reflex itself. The Python API is unchanged. See the
 > [changelog](CHANGELOG.md).
 
 ## Installation
@@ -300,56 +300,68 @@ usually exactly what you want.
 
 ## Demo app
 
-The `react_joyride_demo/` folder is a four page Reflex app covering the basics,
-controlled mode, theming with a Reflex tooltip, and the awkward cases (targets
-that appear late or never, spotlight targets, scrolling, modal steps, blocked
-interaction):
+The `demo/` folder is a four page Reflex app covering the basics, controlled
+mode, theming with a Reflex tooltip, and the awkward cases (targets that appear
+late or never, spotlight targets, scrolling, modal steps, blocked interaction):
 
 ```bash
 uv sync
-cd react_joyride_demo
+cd demo
 uv run reflex run
 ```
 
 ## Development
 
+The project follows the layout of Reflex's official
+[component template](https://github.com/reflex-dev/component-template): the
+package lives in `src/reflex_react_joyride/`, it builds with hatchling, the
+version comes from the git tag, and the `.pyi` stubs are generated at build
+time by `hatch-reflex-pyi` instead of being committed.
+
 ```bash
-uv sync                         # creates .venv and installs the package in editable mode
+uv sync                                # creates .venv, installs the package in editable mode
+uv run pre-commit install              # once: ruff, pyright and file checks on every commit
+uv run pre-commit run --all-files      # lint, format and type-check
 uv run pytest
-uv run ruff check .
-uv run ruff format --check .
-uv build                        # builds the sdist and wheel into dist/
+rm -rf dist && uv build                # sdist and wheel, stubs included, into dist/
 ```
 
-`reflex component` was removed in Reflex 0.10. The `.pyi` stubs are committed;
-regenerate them after changing the component's props:
+`uv sync` writes `src/reflex_react_joyride/joyride.pyi` the first time (it is
+git-ignored). The build hook skips generation when the version hasn't changed,
+so after changing the component's props regenerate the stub yourself, and
+always build into an empty `dist/`:
 
 ```bash
-uv run python -m reflex_base.utils.pyi_generator custom_components/reflex_react_joyride
+cd src && uv run python -m reflex_base.utils.pyi_generator reflex_react_joyride && rm -rf assets
 ```
+
+`reflex component init/build` no longer exist in Reflex 0.10; the template and
+the commands above replace them. See [`AGENTS.md`](AGENTS.md) for the
+conventions coding agents (and humans) should follow.
 
 CI runs on Node 24 (`.nvmrc`); use the same version locally (`nvm use`) if you
 compile the demo with Node instead of Bun.
 
 ## Releasing
 
-Releases are published to PyPI by the `Release` workflow through Trusted
-Publishing, so no token is stored anywhere:
+The version is not written anywhere in the code: it comes from the git tag
+(`uv-dynamic-versioning`). Releases are published to PyPI by the `Release`
+workflow through Trusted Publishing, so no token is stored anywhere:
 
-1. On `develop`, bump `version` in `pyproject.toml` and add an entry to
-   `CHANGELOG.md`.
+1. On `develop`, add an entry to `CHANGELOG.md`.
 2. Open a PR from `develop` to `main` and merge it once the Quality and
    Security workflows pass.
 3. Tag the merge commit on `main` and push the tag:
 
    ```bash
    git switch main && git pull
-   git tag v0.2.0 && git push origin v0.2.0
+   git tag v0.3.0 && git push origin v0.3.0
    ```
 
-The workflow refuses tags that are not on `main` or that don't match the
-`pyproject.toml` version, then runs the tests, builds, publishes to PyPI with
-build provenance attestations and creates the GitHub release.
+The workflow refuses tags that are not on `main`, runs the tests, builds,
+checks that the built version matches the tag and that the stubs are in the
+wheel, publishes to PyPI with build provenance attestations and creates the
+GitHub release.
 
 ## License
 
