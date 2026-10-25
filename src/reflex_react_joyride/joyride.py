@@ -46,7 +46,7 @@ Example:
 from __future__ import annotations
 
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from typing import Any
 
 import reflex as rx
@@ -117,7 +117,7 @@ def _normalize_steps(steps: Any) -> Any:
     return [_normalize(step, raw_keys=("data", *_NODE_KEYS)) for step in steps]
 
 
-def _render_prop(name: str, fn: Callable[[Any], Component]) -> Var:
+def _render_prop(name: str, fn: Callable[[Any], Any]) -> Var:
     """Turn ``lambda props: rx.box(...)`` into a React function component."""
     argument = Var(name).to(dict)
     return ArgsFunctionOperation.create((name,), Var.create(fn(argument)))
@@ -143,7 +143,7 @@ class Joyride(NoSSRComponent):
 
     # The steps of the tour: Step objects, plain dicts, or a State var holding
     # a list of dicts. ``snake_case`` keys are converted for you.
-    steps: Var[list[dict[str, Any]]]
+    steps: Var[Sequence[Step | dict[str, Any]]]
 
     # ----------------------------------------------------------------- playback
     # Run (or stop) the tour. Default: False.
@@ -169,16 +169,16 @@ class Joyride(NoSSRComponent):
 
     # ------------------------------------------------------------- presentation
     # Behaviour and theming shared by every step (a TourOptions or a dict).
-    options: Var[dict[str, Any]]
+    options: Var[TourOptions | dict[str, Any]]
 
     # The strings used in the tooltip (a Locale or a dict).
-    locale: Var[dict[str, Any]]
+    locale: Var[Locale | dict[str, Any]]
 
     # CSS overrides for every element react-joyride renders (a TourStyles or a dict).
-    styles: Var[dict[str, Any]]
+    styles: Var[TourStyles | dict[str, Any]]
 
     # Positioning options forwarded to floating-ui (a FloatingOptions or a dict).
-    floating_options: Var[dict[str, Any]]
+    floating_options: Var[FloatingOptions | dict[str, Any]]
 
     # Render the tour inside this element instead of the document body.
     portal_element: Var[str]

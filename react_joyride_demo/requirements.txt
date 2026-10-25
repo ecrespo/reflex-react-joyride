@@ -1,2 +1,0 @@
-reflex>=0.10.0
-reflex-react-joyride>=0.1.0

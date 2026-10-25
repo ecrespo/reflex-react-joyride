@@ -1,7 +1,7 @@
 import reflex as rx
 
 config = rx.Config(
-    app_name="react_joyride_demo",
+    app_name="demo",
     show_built_with_reflex=False,
     plugins=[
         rx.plugins.RadixThemesPlugin(

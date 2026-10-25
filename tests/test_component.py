@@ -1,7 +1,10 @@
 """The component must compile to the JSX react-joyride understands."""
 
+from typing import Any
+
 import pytest
 import reflex as rx
+
 import reflex_react_joyride as rjr
 
 
@@ -16,6 +19,7 @@ class DemoState(rx.State):
 
 
 def test_library_points_to_the_shared_jsx_wrapper():
+    assert rjr.Joyride.library is not None
     assert rjr.Joyride.library.startswith("$/public/external/reflex_react_joyride/")
     assert rjr.Joyride.library.endswith("joyride_tour.jsx")
     assert rjr.Joyride.tag == "JoyrideTour"
@@ -79,6 +83,27 @@ def test_options_locale_styles_are_camel_cased():
         assert expected in rendered
 
 
+def test_typed_prop_objects_match_their_dict_form():
+    # Also a type-checking test: pyright runs over tests/ and must accept the
+    # PropsBase objects (with only some fields set) wherever a dict is accepted.
+    typed = rjr.joyride(
+        steps=[rjr.Step(target="#a", content="hi", spotlight_padding=rjr.SpotlightPadding(top=4))],
+        options=rjr.TourOptions(show_progress=True, z_index=1000),
+        locale=rjr.Locale(next="Siguiente"),
+        styles=rjr.TourStyles(tooltip={"border_radius": "12px"}),
+        floating_options=rjr.FloatingOptions(hide_arrow=True),
+    )
+    plain = rjr.joyride(
+        # Step serializes in field order, and spotlight_padding comes from TourOptions.
+        steps=[{"spotlight_padding": {"top": 4}, "target": "#a", "content": "hi"}],
+        options={"show_progress": True, "z_index": 1000},
+        locale={"next": "Siguiente"},
+        styles={"tooltip": {"border_radius": "12px"}},
+        floating_options={"hide_arrow": True},
+    )
+    assert str(typed) == str(plain)
+
+
 def test_every_event_trigger_is_wired():
     triggers = [
         "on_event",
@@ -94,7 +119,8 @@ def test_every_event_trigger_is_wired():
         "on_target_not_found",
         "on_error",
     ]
-    component = rjr.joyride(steps=[], **dict.fromkeys(triggers, DemoState.on_tour_event))
+    handlers: dict[str, Any] = dict.fromkeys(triggers, DemoState.on_tour_event)
+    component = rjr.joyride(steps=[], **handlers)
     rendered = str(component)
     for name in triggers:
         camel = "on" + "".join(part.capitalize() for part in name.split("_")[1:])
@@ -113,7 +139,7 @@ def test_beacon_render_prop_becomes_a_function_component():
 
 def test_render_props_must_be_callable():
     with pytest.raises(TypeError, match="must be a callable"):
-        rjr.joyride(steps=[], tooltip=rx.box("not a callable"))
+        rjr.joyride(steps=[], tooltip=rx.box("not a callable"))  # pyright: ignore[reportArgumentType]
 
 
 def test_portal_element_and_tour_id_reach_the_wrapper():

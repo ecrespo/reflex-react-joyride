@@ -20,19 +20,20 @@ concurrency:
 
 jobs:
   lint:
-    name: Lint and format
+    name: Lint, format and type-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           enable-cache: true
-      - name: Ruff lint
-        run: uv run --frozen ruff check --output-format=github .
-      - name: Ruff format
-        run: uv run --frozen ruff format --check .
+      - name: Install (generates the .pyi stubs pyright reads)
+        run: uv sync --locked
+      - name: pre-commit (ruff, pyright and file hygiene)
+        run: uv run pre-commit run --all-files --show-diff-on-failure
 
   test:
     name: Tests (Python ${{ matrix.python-version }})
@@ -40,17 +41,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
       - name: Run pytest
-        run: uv run --frozen pytest
+        run: uv run --locked pytest
 
   demo:
     name: Demo app compiles
@@ -58,6 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
@@ -66,8 +69,8 @@ jobs:
         with:
           node-version-file: .nvmrc
       - name: Compile the demo
-        working-directory: react_joyride_demo
-        run: uv run --frozen reflex compile
+        working-directory: demo
+        run: uv run --locked reflex compile
 
   package:
     name: Build and check package
@@ -75,12 +78,20 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           enable-cache: true
-      - name: Build sdist and wheel
+      - name: Build sdist and wheel (generates the .pyi stubs)
         run: uv build
+      - name: Version comes from the git tags
+        run: |
+          ls dist/
+          if ls dist/ | grep -q -- '-0\.0\.0'; then
+            echo "::error::Built version 0.0.0, the git tags were not fetched"
+            exit 1
+          fi
       - name: Check metadata renders on PyPI
         run: uvx twine check --strict dist/*
       - name: Wheel ships the JSX wrapper and type stubs
